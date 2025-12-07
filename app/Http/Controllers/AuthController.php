@@ -9,8 +9,27 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
+use OpenApi\Attributes as OA;
+
 class AuthController extends Controller
 {
+    #[OA\Post(
+        path: '/api/auth/signup',
+        summary: 'Register a new user',
+        tags: ['Auth'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(properties: [
+                new OA\Property(property: 'name', type: 'string'),
+                new OA\Property(property: 'email', type: 'string', format: 'email'),
+                new OA\Property(property: 'password', type: 'string', format: 'password'),
+            ])
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'User created successfully'),
+            new OA\Response(response: 422, description: 'Validation error')
+        ]
+    )]
     public function register(SignupRequest $request): JsonResponse
     {
         $user = User::create([
@@ -28,6 +47,22 @@ class AuthController extends Controller
         ], 201);
     }
 
+    #[OA\Post(
+        path: '/api/auth/login',
+        summary: 'Login user and get JWT',
+        tags: ['Auth'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(properties: [
+                new OA\Property(property: 'email', type: 'string', format: 'email'),
+                new OA\Property(property: 'password', type: 'string', format: 'password'),
+            ])
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Login successful'),
+            new OA\Response(response: 401, description: 'Invalid credentials')
+        ]
+    )]
     public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
@@ -39,11 +74,29 @@ class AuthController extends Controller
         return $this->respondWithToken($token);
     }
 
+    #[OA\Get(
+        path: '/api/me',
+        summary: 'Get authenticated user profile',
+        tags: ['Auth'],
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'User profile')
+        ]
+    )]
     public function me(): JsonResponse
     {
         return response()->json(auth('api')->user());
     }
 
+    #[OA\Post(
+        path: '/api/logout',
+        summary: 'Logout user',
+        tags: ['Auth'],
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'Logged out successfully')
+        ]
+    )]
     public function logout(): JsonResponse
     {
         auth('api')->logout();
@@ -51,6 +104,15 @@ class AuthController extends Controller
         return response()->json(['message' => 'Successfully logged out']);
     }
 
+    #[OA\Post(
+        path: '/api/refresh',
+        summary: 'Refresh JWT token',
+        tags: ['Auth'],
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'New token generated')
+        ]
+    )]
     public function refresh(): JsonResponse
     {
         return $this->respondWithToken(auth('api')->refresh());
