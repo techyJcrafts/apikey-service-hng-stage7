@@ -14,10 +14,12 @@ class ApiKey extends Model
         'name',
         'key',
         'last_used_at',
+        'expires_at',
     ];
 
     protected $casts = [
         'last_used_at' => 'datetime',
+        'expires_at' => 'datetime',
     ];
 
     protected $hidden = [
