@@ -11,19 +11,27 @@ class ApiKeyController extends Controller
 {
     public function index(): JsonResponse
     {
-        return response()->json(auth()->user()->apiKeys);
+        return response()->json(auth('api')->user()->apiKeys);
     }
 
     public function store(CreateApiKeyRequest $request, ApiKeyService $service): JsonResponse
     {
-        $result = $service->createKey(auth()->user(), $request->name);
-
-        return response()->json($result, 201);
+        try {
+            $user = auth('api')->user();
+            if (!$user) {
+                return response()->json(['error' => 'User not authenticated in controller'], 401);
+            }
+            $expiresAt = $request->expires_at ? now()->addDays((int) $request->expires_at) : null;
+            $result = $service->createKey($user, $request->name, $expiresAt);
+            return response()->json($result, 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
+        }
     }
 
     public function destroy(ApiKey $apiKey): JsonResponse
     {
-        if ($apiKey->user_id !== auth()->id()) {
+        if ($apiKey->user_id !== auth('api')->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
