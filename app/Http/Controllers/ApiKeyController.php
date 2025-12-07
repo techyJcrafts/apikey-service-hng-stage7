@@ -49,6 +49,11 @@ class ApiKeyController extends Controller
             if (!$user) {
                 return response()->json(['error' => 'User not authenticated in controller'], 401);
             }
+
+            if ($user->apiKeys()->count() >= 5) {
+                return response()->json(['error' => 'You have reached the maximum limit of 5 API keys.'], 422);
+            }
+
             $expiresAt = $request->expires_at ? now()->addDays((int) $request->expires_at) : null;
             $result = $service->createKey($user, $request->name, $expiresAt);
             return response()->json($result, 201);
