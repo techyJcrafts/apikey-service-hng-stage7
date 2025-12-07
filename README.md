@@ -96,11 +96,5 @@ Headers: `X-API-KEY: <your-api-key>`
 php artisan test
 ```
 
-**Run Manual Test Script**
-```bash
-# Requires jq installed
-./test-api.sh
-```
-
 **Postman**
 Import `Laravel-API-Auth.postman_collection.json` into Postman.
