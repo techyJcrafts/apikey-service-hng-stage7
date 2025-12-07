@@ -17,7 +17,7 @@ class ApiKeyTest extends TestCase
         $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($user);
 
         $response = $this->withHeader('Authorization', "Bearer $token")
-            ->postJson('/api/api-keys', [
+            ->postJson('/api/keys/create', [
                 'name' => 'Test Key',
             ]);
 

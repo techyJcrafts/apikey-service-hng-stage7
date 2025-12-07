@@ -12,7 +12,7 @@ class AuthTest extends TestCase
 
     public function test_user_can_register()
     {
-        $response = $this->postJson('/api/register', [
+        $response = $this->postJson('/api/auth/signup', [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password',
@@ -32,7 +32,7 @@ class AuthTest extends TestCase
             'password' => bcrypt('password'),
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => 'test@example.com',
             'password' => 'password',
         ]);
