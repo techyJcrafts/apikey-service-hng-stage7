@@ -78,9 +78,10 @@ Headers: `Authorization: Bearer <token>`
 
 ## Tech Stack Decisions
 
-- **tymon/jwt-auth**: Chosen for robust, standard-compliant JWT handling in Laravel without the overhead of Laravel Passport.
-- **SQLite**: Selected for zero-configuration local development and testing, allowing instant setup without external database services.
-- **PHPUnit**: Utilized for its deep integration with Laravel, enabling comprehensive feature testing of API endpoints and authentication flows.
+- **tymon/jwt-auth**: Chosen to implement stateless, standard-compliant JWT authentication independent of session cookies, offering fine-grained control over token lifecycle.
+- **Service Layer Pattern (`ApiKeyService`)**: Implemented to encapsulate API key generation and validation logic, ensuring the controller remains thin and the business logic is reusable.
+- **Custom Middleware (`AuthenticateApiKey`)**: Developed to specifically handle service-to-service authentication by inspecting custom headers, distinct from the user-centric JWT guard.
+- **Laravel Form Requests**: Utilized to decouple validation rules from controller logic, ensuring that invalid requests are intercepted early with standardized error responses.
 
 ### Service Access (Protected by API Key)
 
