@@ -15,6 +15,7 @@ class CreateApiKeyRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'expires_at' => 'nullable|integer|min:1|max:365', // Days until expiration
         ];
     }
 }

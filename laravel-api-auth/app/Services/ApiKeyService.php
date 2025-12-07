@@ -9,13 +9,14 @@ use Illuminate\Http\Request;
 
 class ApiKeyService
 {
-    public function createKey(User $user, string $name): array
+    public function createKey(User $user, string $name, ?\DateTimeInterface $expiresAt = null): array
     {
         $plainKey = Str::random(64);
 
         $apiKey = $user->apiKeys()->create([
             'name' => $name,
             'key' => hash('sha256', $plainKey),
+            'expires_at' => $expiresAt,
         ]);
 
         return [
@@ -28,7 +29,17 @@ class ApiKeyService
     {
         $hashedKey = hash('sha256', $plainKey);
 
-        return ApiKey::where('key', $hashedKey)->first();
+        $apiKey = ApiKey::where('key', $hashedKey)->first();
+
+        if (!$apiKey) {
+            return null;
+        }
+
+        if ($apiKey->expires_at && $apiKey->expires_at->isPast()) {
+            return null;
+        }
+
+        return $apiKey;
     }
 
     public function recordUsage(ApiKey $apiKey, Request $request): void
