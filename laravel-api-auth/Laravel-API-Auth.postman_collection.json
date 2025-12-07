@@ -23,13 +23,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/register",
+							"raw": "{{base_url}}/api/auth/signup",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
-								"register"
+								"auth",
+								"signup"
 							]
 						}
 					},
@@ -62,12 +63,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/login",
+							"raw": "{{base_url}}/api/auth/login",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"auth",
 								"login"
 							]
 						}
@@ -176,7 +178,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"My New Key\"\n}",
+							"raw": "{\n    \"name\": \"My New Key\",\n    \"expires_at\": 30\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -184,13 +186,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/api-keys",
+							"raw": "{{base_url}}/api/keys/create",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
-								"api-keys"
+								"keys",
+								"create"
 							]
 						}
 					},

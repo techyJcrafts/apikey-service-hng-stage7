@@ -38,7 +38,7 @@ A complete, production-ready API authentication system built with Laravel 11.
 ### Authentication (JWT)
 
 **Register**
-`POST /api/register`
+`POST /api/auth/signup`
 ```json
 {
     "name": "John Doe",
@@ -48,7 +48,7 @@ A complete, production-ready API authentication system built with Laravel 11.
 ```
 
 **Login**
-`POST /api/login`
+`POST /api/auth/login`
 ```json
 {
     "email": "john@example.com",
@@ -60,11 +60,12 @@ A complete, production-ready API authentication system built with Laravel 11.
 ### API Key Management (Protected by JWT)
 
 **Create Key**
-`POST /api/api-keys`
+`POST /api/keys/create`
 Headers: `Authorization: Bearer <token>`
 ```json
 {
-    "name": "Mobile App Key"
+    "name": "Mobile App Key",
+    "expires_at": 30 // Optional: Days until expiration
 }
 ```
 *Returns the plain text key ONLY ONCE.*
@@ -74,6 +75,12 @@ Headers: `Authorization: Bearer <token>`
 
 **Delete Key**
 `DELETE /api/api-keys/{id}`
+
+## Tech Stack Decisions
+
+- **tymon/jwt-auth**: Chosen for robust, standard-compliant JWT handling in Laravel without the overhead of Laravel Passport.
+- **SQLite**: Selected for zero-configuration local development and testing, allowing instant setup without external database services.
+- **PHPUnit**: Utilized for its deep integration with Laravel, enabling comprehensive feature testing of API endpoints and authentication flows.
 
 ### Service Access (Protected by API Key)
 
