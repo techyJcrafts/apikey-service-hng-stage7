@@ -14,8 +14,18 @@ class CreateApiKeyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'expires_at' => 'nullable|integer|min:1|max:365', // Days until expiration
+            'name' => ['required', 'string', 'max:100'],
+            'permissions' => ['required', 'array', 'min:1'],
+            'permissions.*' => ['required', 'string', 'in:deposit,transfer,read'],
+            'expiry' => ['required', 'string', 'regex:/^[1-9]\d*[HDMY]$/'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'expiry.regex' => 'Expiry must be in format: 1H, 1D, 1M, or 1Y',
+            'permissions.*.in' => 'Permission must be one of: deposit, transfer, read',
         ];
     }
 }
