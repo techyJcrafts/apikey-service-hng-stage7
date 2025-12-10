@@ -5,13 +5,139 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/api/api-keys": {
+        "/keys/create": {
+            "post": {
+                "tags": [
+                    "API Keys"
+                ],
+                "summary": "Create new API key",
+                "operationId": "a2f7db7c21750f9a23692d815db2c6a2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "permissions",
+                                    "expiry"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "wallet-service"
+                                    },
+                                    "permissions": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "deposit",
+                                                "transfer",
+                                                "read"
+                                            ]
+                                        }
+                                    },
+                                    "expiry": {
+                                        "description": "1H, 1D, 1M, or 1Y",
+                                        "type": "string",
+                                        "example": "1D"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "API key created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "api_key": {
+                                                    "description": "SAVE THIS! It's shown only once",
+                                                    "type": "string"
+                                                },
+                                                "expires_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/keys/rollover": {
+            "post": {
+                "tags": [
+                    "API Keys"
+                ],
+                "summary": "Rollover expired API key",
+                "operationId": "5598f3181e1d77d530329b83db50c057",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "expired_key_id",
+                                    "expiry"
+                                ],
+                                "properties": {
+                                    "expired_key_id": {
+                                        "type": "string"
+                                    },
+                                    "expiry": {
+                                        "type": "string",
+                                        "example": "1M"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "API key rolled over"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/keys": {
             "get": {
                 "tags": [
                     "API Keys"
                 ],
-                "summary": "List API keys",
-                "operationId": "48d6f21fc4f70c87bb9e0fe128fc333d",
+                "summary": "List all API keys",
+                "operationId": "9d9a099c0ad80380e952fd184bcd38e1",
                 "responses": {
                     "200": {
                         "description": "List of API keys"
@@ -24,70 +150,26 @@
                 ]
             }
         },
-        "/api/keys/create": {
-            "post": {
-                "tags": [
-                    "API Keys"
-                ],
-                "summary": "Create a new API key",
-                "operationId": "ab756ddfd9a75b8d21fb03ef507a3f92",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "name": {
-                                        "type": "string"
-                                    },
-                                    "expires_at": {
-                                        "description": "Days until expiration (optional)",
-                                        "type": "integer"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "API Key created"
-                    },
-                    "401": {
-                        "description": "Unauthenticated"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/api-keys/{apiKey}": {
+        "/keys/{id}": {
             "delete": {
                 "tags": [
                     "API Keys"
                 ],
-                "summary": "Delete an API key",
-                "operationId": "598ae837194a094e6649e3410806f80d",
+                "summary": "Revoke API key",
+                "operationId": "9330194817df89f632b6f82fbe85bcdb",
                 "parameters": [
                     {
-                        "name": "apiKey",
+                        "name": "id",
                         "in": "path",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "API Key deleted"
-                    },
-                    "403": {
-                        "description": "Unauthorized"
+                        "description": "API key revoked"
                     }
                 },
                 "security": [
@@ -230,6 +312,312 @@
                     }
                 ]
             }
+        },
+        "/api/auth/google": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Redirect to Google OAuth",
+                "operationId": "d9545bf39a43c7b6dad24d8b6b4bd67d",
+                "responses": {
+                    "302": {
+                        "description": "Redirect to Google"
+                    }
+                }
+            }
+        },
+        "/api/auth/google/callback": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Handle Google OAuth callback",
+                "operationId": "5793de99cbbfc80402e9b1663438cf52",
+                "responses": {
+                    "200": {
+                        "description": "Login successful with JWT"
+                    }
+                }
+            }
+        },
+        "/wallet/transfer": {
+            "post": {
+                "tags": [
+                    "Transfer"
+                ],
+                "summary": "Transfer to another wallet",
+                "operationId": "05dcc38a4bd8d9cd8844bc5e829a487c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "wallet_number",
+                                    "amount"
+                                ],
+                                "properties": {
+                                    "wallet_number": {
+                                        "type": "string",
+                                        "example": "45123456789012"
+                                    },
+                                    "amount": {
+                                        "type": "number",
+                                        "example": 3000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Transfer successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "reference": {
+                                                    "type": "string"
+                                                },
+                                                "amount": {
+                                                    "type": "number"
+                                                },
+                                                "recipient_wallet": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKey": []
+                    }
+                ]
+            }
+        },
+        "/wallet/balance": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get wallet balance",
+                "operationId": "12ec0a5ab01a00de6e977fe116be6b84",
+                "responses": {
+                    "200": {
+                        "description": "Wallet balance",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "balance": {
+                                                    "type": "number",
+                                                    "example": 15000
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "NGN"
+                                                },
+                                                "wallet_number": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKey": []
+                    }
+                ]
+            }
+        },
+        "/wallet/deposit": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Initialize deposit",
+                "operationId": "566a24fb27cc48c154aa4e021a49547b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "amount"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "description": "Amount in Naira",
+                                        "type": "number",
+                                        "example": 5000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Deposit initialized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "reference": {
+                                                    "type": "string"
+                                                },
+                                                "authorization_url": {
+                                                    "description": "Paystack checkout URL",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKey": []
+                    }
+                ]
+            }
+        },
+        "/wallet/deposit/{reference}/status": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Check deposit status",
+                "operationId": "8c47bf7cf7a9b11287e149dc712c1a48",
+                "parameters": [
+                    {
+                        "name": "reference",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transaction status"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKey": []
+                    }
+                ]
+            }
+        },
+        "/wallet/transactions": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Get transaction history",
+                "operationId": "e140d9fc0ac708394f008018989ce6ad",
+                "responses": {
+                    "200": {
+                        "description": "List of transactions"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKey": []
+                    }
+                ]
+            }
+        },
+        "/wallet/paystack/webhook": {
+            "post": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Paystack webhook handler",
+                "operationId": "90ce15ac79333176895c51c25326c58f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "event": {
+                                        "type": "string",
+                                        "example": "charge.success"
+                                    },
+                                    "data": {
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Webhook processed"
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -238,13 +626,31 @@
                 "type": "http",
                 "bearerFormat": "JWT",
                 "scheme": "bearer"
+            },
+            "apiKey": {
+                "type": "apiKey",
+                "description": "API Key Authentication",
+                "name": "x-api-key",
+                "in": "header"
             }
         }
     },
     "tags": [
         {
             "name": "API Keys",
-            "description": "API Keys"
+            "description": "API key management endpoints"
+        },
+        {
+            "name": "Transfer",
+            "description": "P2P transfer endpoints"
+        },
+        {
+            "name": "Wallet",
+            "description": "Wallet operations endpoints"
+        },
+        {
+            "name": "Webhooks",
+            "description": "External webhooks (Paystack)"
         },
         {
             "name": "Auth",
