@@ -17,11 +17,20 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
 
+        // Create a wallet for the user
+        $walletService = new \App\Services\WalletService(new \App\Services\PaystackService());
+        $walletService->createWallet($user);
+
         // Create an API key for the user
         $service = new ApiKeyService();
-        $keyData = $service->createKey($user, 'Development Key');
+        $keyData = $service->createApiKey(
+            $user,
+            'Development Key',
+            ['wallet.read', 'wallet.fund', 'wallet.transfer'], // Default permissions
+            '1Y' // Default expiry
+        );
 
         $this->command->info('User created: test@example.com / password');
-        $this->command->info('API Key created: ' . $keyData['key']);
+        $this->command->info('API Key created: ' . $keyData['api_key']);
     }
 }
