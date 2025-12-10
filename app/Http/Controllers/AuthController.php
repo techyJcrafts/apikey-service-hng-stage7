@@ -126,4 +126,53 @@ class AuthController extends Controller
             'expires_in' => auth('api')->factory()->getTTL() * 60
         ]);
     }
+    #[OA\Get(
+        path: '/api/auth/google',
+        summary: 'Redirect to Google OAuth',
+        tags: ['Auth'],
+        responses: [
+            new OA\Response(response: 302, description: 'Redirect to Google')
+        ]
+    )]
+    public function redirectToGoogle()
+    {
+        return \Laravel\Socialite\Facades\Socialite::driver('google')->stateless()->redirect();
+    }
+
+    #[OA\Get(
+        path: '/api/auth/google/callback',
+        summary: 'Handle Google OAuth callback',
+        tags: ['Auth'],
+        responses: [
+            new OA\Response(response: 200, description: 'Login successful with JWT')
+        ]
+    )]
+    public function handleGoogleCallback(): JsonResponse
+    {
+        try {
+            $googleUser = \Laravel\Socialite\Facades\Socialite::driver('google')->stateless()->user();
+
+            $user = User::firstOrCreate(
+                ['email' => $googleUser->getEmail()],
+                [
+                    'name' => $googleUser->getName(),
+                    'google_id' => $googleUser->getId(),
+                    'password' => Hash::make(\Illuminate\Support\Str::random(24)), // Random password
+                    'email_verified_at' => now(),
+                ]
+            );
+
+            // Auto-create wallet if not exists
+            if (!$user->wallet) {
+                app(\App\Services\WalletService::class)->createWallet($user);
+            }
+
+            $token = JWTAuth::fromUser($user);
+
+            return $this->respondWithToken($token);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Google authentication failed', 'message' => $e->getMessage()], 401);
+        }
+    }
 }

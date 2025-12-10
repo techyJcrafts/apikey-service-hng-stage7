@@ -11,6 +11,13 @@ use OpenApi\Attributes as OA;
     scheme: "bearer",
     bearerFormat: "JWT"
 )]
+#[OA\SecurityScheme(
+    securityScheme: "apiKey",
+    type: "apiKey",
+    in: "header",
+    name: "x-api-key",
+    description: "API Key Authentication"
+)]
 abstract class Controller
 {
     //
