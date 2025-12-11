@@ -3,86 +3,156 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateApiKeyRequest;
-use App\Models\ApiKey;
+use App\Http\Requests\RolloverKeyRequest;
 use App\Services\ApiKeyService;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
-use OpenApi\Attributes as OA;
-
+/**
+ * @OA\Tag(
+ *     name="API Keys",
+ *     description="API key management endpoints"
+ * )
+ */
 class ApiKeyController extends Controller
 {
-    #[OA\Get(
-        path: '/api/api-keys',
-        summary: 'List API keys',
-        tags: ['API Keys'],
-        security: [['bearerAuth' => []]],
-        responses: [
-            new OA\Response(response: 200, description: 'List of API keys')
-        ]
-    )]
-    public function index(): JsonResponse
-    {
-        return response()->json(auth('api')->user()->apiKeys);
+    public function __construct(
+        private ApiKeyService $apiKeyService
+    ) {
     }
 
-    #[OA\Post(
-        path: '/api/keys/create',
-        summary: 'Create a new API key',
-        tags: ['API Keys'],
-        security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\JsonContent(properties: [
-                new OA\Property(property: 'name', type: 'string'),
-                new OA\Property(property: 'expires_at', type: 'integer', description: 'Days until expiration (optional)'),
-            ])
-        ),
-        responses: [
-            new OA\Response(response: 201, description: 'API Key created'),
-            new OA\Response(response: 401, description: 'Unauthenticated')
-        ]
-    )]
-    public function store(CreateApiKeyRequest $request, ApiKeyService $service): JsonResponse
+    /**
+     * @OA\Post(
+     *     path="/keys/create",
+     *     tags={"API Keys"},
+     *     summary="Create new API key",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "permissions", "expiry"},
+     *             @OA\Property(property="name", type="string", example="wallet-service"),
+     *             @OA\Property(property="permissions", type="array", @OA\Items(type="string", enum={"deposit", "transfer", "read"})),
+     *             @OA\Property(property="expiry", type="string", example="1D", description="1H, 1D, 1M, or 1Y")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="API key created",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 @OA\Property(property="api_key", type="string", description="SAVE THIS! It's shown only once"),
+     *                 @OA\Property(property="expires_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function create(CreateApiKeyRequest $request)
     {
-        try {
-            $user = auth('api')->user();
-            if (!$user) {
-                return response()->json(['error' => 'User not authenticated in controller'], 401);
-            }
+        $data = $this->apiKeyService->createApiKey(
+            $request->user(),
+            $request->name,
+            $request->permissions,
+            $request->expiry
+        );
 
-            if ($user->apiKeys()->count() >= 5) {
-                return response()->json(['error' => 'You have reached the maximum limit of 5 API keys.'], 422);
-            }
-
-            $expiresAt = $request->expires_at ? now()->addDays((int) $request->expires_at) : null;
-            $result = $service->createKey($user, $request->name, $expiresAt);
-            return response()->json($result, 201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'status' => 201,
+            'message' => 'API key created successfully. Save it now - you won\'t see it again!',
+            'data' => $data,
+        ], 201);
     }
 
-    #[OA\Delete(
-        path: '/api/api-keys/{apiKey}',
-        summary: 'Delete an API key',
-        tags: ['API Keys'],
-        security: [['bearerAuth' => []]],
-        parameters: [
-            new OA\Parameter(name: 'apiKey', in: 'path', required: true, schema: new OA\Schema(type: 'integer'))
-        ],
-        responses: [
-            new OA\Response(response: 200, description: 'API Key deleted'),
-            new OA\Response(response: 403, description: 'Unauthorized')
-        ]
-    )]
-    public function destroy(ApiKey $apiKey): JsonResponse
+    /**
+     * @OA\Post(
+     *     path="/keys/rollover",
+     *     tags={"API Keys"},
+     *     summary="Rollover expired API key",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"expired_key_id", "expiry"},
+     *             @OA\Property(property="expired_key_id", type="string"),
+     *             @OA\Property(property="expiry", type="string", example="1M")
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="API key rolled over")
+     * )
+     */
+    public function rollover(RolloverKeyRequest $request)
     {
-        if ($apiKey->user_id !== auth('api')->id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+        $data = $this->apiKeyService->rolloverApiKey(
+            $request->user(),
+            $request->expired_key_id,
+            $request->expiry
+        );
 
-        $apiKey->delete();
+        return response()->json([
+            'success' => true,
+            'status' => 201,
+            'message' => 'API key rolled over successfully',
+            'data' => $data,
+        ], 201);
+    }
 
-        return response()->json(['message' => 'API Key deleted successfully']);
+    /**
+     * @OA\Get(
+     *     path="/keys",
+     *     tags={"API Keys"},
+     *     summary="List all API keys",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="List of API keys")
+     * )
+     */
+    public function index(Request $request)
+    {
+        $apiKeys = $request->user()->apiKeys()
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($key) {
+                return [
+                    'id' => $key->id,
+                    'name' => $key->name,
+                    'permissions' => $key->permissions,
+                    'expires_at' => $key->expires_at->toIso8601String(),
+                    'is_active' => $key->isValid(),
+                    'last_used_at' => $key->last_used_at?->toIso8601String(),
+                    'created_at' => $key->created_at->toIso8601String(),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'status' => 200,
+            'message' => 'API keys retrieved successfully',
+            'data' => $apiKeys,
+        ]);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/keys/{id}",
+     *     tags={"API Keys"},
+     *     summary="Revoke API key",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="API key revoked")
+     * )
+     */
+    public function revoke(Request $request, string $id)
+    {
+        $apiKey = $request->user()->apiKeys()->findOrFail($id);
+        $apiKey->revoke();
+
+        return response()->json([
+            'success' => true,
+            'status' => 200,
+            'message' => 'API key revoked successfully',
+        ]);
     }
 }
