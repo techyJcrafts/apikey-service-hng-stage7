@@ -319,6 +319,11 @@
                     "Auth"
                 ],
                 "summary": "Redirect to Google OAuth",
+                "description": "Click the link below to login with Google. DO NOT use Try it out.",
+                "externalDocs": {
+                    "description": "LOGIN WITH GOOGLE HERE",
+                    "url": "/api/auth/google"
+                },
                 "operationId": "d9545bf39a43c7b6dad24d8b6b4bd67d",
                 "responses": {
                     "302": {
@@ -592,7 +597,7 @@
                     "Webhooks"
                 ],
                 "summary": "Paystack webhook handler",
-                "operationId": "90ce15ac79333176895c51c25326c58f",
+                "operationId": "2c89f8ea99530837850ec79fc0e8a399",
                 "requestBody": {
                     "required": true,
                     "content": {
