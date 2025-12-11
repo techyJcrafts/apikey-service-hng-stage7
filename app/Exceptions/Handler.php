@@ -32,10 +32,10 @@ class Handler extends ExceptionHandler
         });
     }
 
-    public function render($request, Throwable $e): \Illuminate\Http\Response|\Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+    public function render($request, Throwable $e): \Illuminate\Http\Response|JsonResponse|\Symfony\Component\HttpFoundation\Response
     {
         // Custom exception handling for API
-        if ($request->expectsJson()) {
+        if ($request->expectsJson() || $request->is('api*')) {
             return $this->handleApiException($request, $e);
         }
 
@@ -74,6 +74,9 @@ class Handler extends ExceptionHandler
             $e instanceof DuplicateTransactionException
         ) {
             $status = $e->getCode();
+            if ($status < 100 || $status > 599) {
+                $status = 400; // Default to Bad Request if code is invalid
+            }
             $message = $e->getMessage();
         }
         // Generic exceptions (hide details in production)
@@ -85,6 +88,7 @@ class Handler extends ExceptionHandler
 
         $response = [
             'success' => false,
+            'status' => $status,
             'message' => $message,
         ];
 
