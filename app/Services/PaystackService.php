@@ -27,7 +27,8 @@ class PaystackService
             'reference' => $data['reference'],
         ]);
 
-        $response = Http::withToken($this->secretKey)
+        $response = Http::withoutVerifying()
+            ->withToken($this->secretKey)
             ->post("{$this->baseUrl}/transaction/initialize", [
                 'email' => $data['email'],
                 'amount' => $data['amount'], // Must be in kobo!
@@ -60,7 +61,8 @@ class PaystackService
     {
         Log::info('Paystack: Verifying transaction', ['reference' => $reference]);
 
-        $response = Http::withToken($this->secretKey)
+        $response = Http::withoutVerifying()
+            ->withToken($this->secretKey)
             ->get("{$this->baseUrl}/transaction/verify/{$reference}");
 
         if (!$response->successful()) {

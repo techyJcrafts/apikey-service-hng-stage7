@@ -263,7 +263,7 @@ class WalletService
                 'amount' => $amount,
                 'balance_before' => $senderWallet->balance,
                 'balance_after' => $senderNewBalance,
-                'reference' => $reference,
+                'reference' => $reference . '_OUT',
                 'status' => 'success',
                 'metadata' => [
                     'recipient_wallet' => $recipientWallet->wallet_number,
@@ -280,7 +280,7 @@ class WalletService
                 'amount' => $amount,
                 'balance_before' => $recipientWallet->balance,
                 'balance_after' => $recipientNewBalance,
-                'reference' => $reference,
+                'reference' => $reference . '_IN',
                 'status' => 'success',
                 'metadata' => [
                     'sender_wallet' => $senderWallet->wallet_number,
