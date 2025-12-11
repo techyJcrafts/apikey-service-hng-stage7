@@ -21,7 +21,7 @@ class WalletController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/wallet/balance",
+     *     path="/api/wallet/balance",
      *     tags={"Wallet"},
      *     summary="Get wallet balance",
      *     security={{"bearerAuth":{}}, {"apiKey":{}}},
@@ -58,7 +58,7 @@ class WalletController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/wallet/deposit",
+     *     path="/api/wallet/deposit",
      *     tags={"Wallet"},
      *     summary="Initialize deposit",
      *     security={{"bearerAuth":{}}, {"apiKey":{}}},
@@ -100,7 +100,7 @@ class WalletController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/wallet/deposit/{reference}/status",
+     *     path="/api/wallet/deposit/{reference}/status",
      *     tags={"Wallet"},
      *     summary="Check deposit status",
      *     security={{"bearerAuth":{}}, {"apiKey":{}}},
@@ -122,7 +122,7 @@ class WalletController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/wallet/transactions",
+     *     path="/api/wallet/transactions",
      *     tags={"Wallet"},
      *     summary="Get transaction history",
      *     security={{"bearerAuth":{}}, {"apiKey":{}}},

@@ -23,7 +23,7 @@ class WebhookController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/wallet/paystack/webhook",
+     *     path="/api/wallet/paystack/webhook",
      *     tags={"Webhooks"},
      *     summary="Paystack webhook handler",
      *     @OA\RequestBody(

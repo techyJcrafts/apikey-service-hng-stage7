@@ -22,7 +22,7 @@ class ApiKeyController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/keys/create",
+     *     path="/api/keys/create",
      *     tags={"API Keys"},
      *     summary="Create new API key",
      *     security={{"bearerAuth":{}}},
@@ -69,7 +69,7 @@ class ApiKeyController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/keys/rollover",
+     *     path="/api/keys/rollover",
      *     tags={"API Keys"},
      *     summary="Rollover expired API key",
      *     security={{"bearerAuth":{}}},
@@ -102,7 +102,7 @@ class ApiKeyController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/keys",
+     *     path="/api/keys",
      *     tags={"API Keys"},
      *     summary="List all API keys",
      *     security={{"bearerAuth":{}}},
@@ -136,7 +136,7 @@ class ApiKeyController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/keys/{id}",
+     *     path="/api/keys/{id}",
      *     tags={"API Keys"},
      *     summary="Revoke API key",
      *     security={{"bearerAuth":{}}},

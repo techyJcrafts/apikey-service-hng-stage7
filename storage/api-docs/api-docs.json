@@ -5,13 +5,13 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/keys/create": {
+        "/api/keys/create": {
             "post": {
                 "tags": [
                     "API Keys"
                 ],
                 "summary": "Create new API key",
-                "operationId": "a2f7db7c21750f9a23692d815db2c6a2",
+                "operationId": "7f1ca4c19dab3c8aed969a5b10ba6c73",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -89,13 +89,13 @@
                 ]
             }
         },
-        "/keys/rollover": {
+        "/api/keys/rollover": {
             "post": {
                 "tags": [
                     "API Keys"
                 ],
                 "summary": "Rollover expired API key",
-                "operationId": "5598f3181e1d77d530329b83db50c057",
+                "operationId": "a10fd5469582f87e8c5e37222e22cc94",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -131,13 +131,13 @@
                 ]
             }
         },
-        "/keys": {
+        "/api/keys": {
             "get": {
                 "tags": [
                     "API Keys"
                 ],
                 "summary": "List all API keys",
-                "operationId": "9d9a099c0ad80380e952fd184bcd38e1",
+                "operationId": "bd82250cacaf0cb5e68f5fb5f41ef508",
                 "responses": {
                     "200": {
                         "description": "List of API keys"
@@ -150,13 +150,13 @@
                 ]
             }
         },
-        "/keys/{id}": {
+        "/api/keys/{id}": {
             "delete": {
                 "tags": [
                     "API Keys"
                 ],
                 "summary": "Revoke API key",
-                "operationId": "9330194817df89f632b6f82fbe85bcdb",
+                "operationId": "57329fb496fcb6b78d89590dd620112a",
                 "parameters": [
                     {
                         "name": "id",
@@ -346,13 +346,13 @@
                 }
             }
         },
-        "/wallet/transfer": {
+        "/api/wallet/transfer": {
             "post": {
                 "tags": [
                     "Transfer"
                 ],
                 "summary": "Transfer to another wallet",
-                "operationId": "05dcc38a4bd8d9cd8844bc5e829a487c",
+                "operationId": "10cc1674827d231cf759a964377d8e86",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -421,13 +421,13 @@
                 ]
             }
         },
-        "/wallet/balance": {
+        "/api/wallet/balance": {
             "get": {
                 "tags": [
                     "Wallet"
                 ],
                 "summary": "Get wallet balance",
-                "operationId": "12ec0a5ab01a00de6e977fe116be6b84",
+                "operationId": "2a4a1c7eba45be583fce194ae60a72c1",
                 "responses": {
                     "200": {
                         "description": "Wallet balance",
@@ -471,13 +471,13 @@
                 ]
             }
         },
-        "/wallet/deposit": {
+        "/api/wallet/deposit": {
             "post": {
                 "tags": [
                     "Wallet"
                 ],
                 "summary": "Initialize deposit",
-                "operationId": "566a24fb27cc48c154aa4e021a49547b",
+                "operationId": "506845afd12f94e48ec2a586dfb9ee86",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -537,13 +537,13 @@
                 ]
             }
         },
-        "/wallet/deposit/{reference}/status": {
+        "/api/wallet/deposit/{reference}/status": {
             "get": {
                 "tags": [
                     "Wallet"
                 ],
                 "summary": "Check deposit status",
-                "operationId": "8c47bf7cf7a9b11287e149dc712c1a48",
+                "operationId": "7a3714a82b33fe3f3c9d2c594c5e9223",
                 "parameters": [
                     {
                         "name": "reference",
@@ -569,13 +569,13 @@
                 ]
             }
         },
-        "/wallet/transactions": {
+        "/api/wallet/transactions": {
             "get": {
                 "tags": [
                     "Wallet"
                 ],
                 "summary": "Get transaction history",
-                "operationId": "e140d9fc0ac708394f008018989ce6ad",
+                "operationId": "d7003c8f7d8d61b2b6b5b2d6f2377cc3",
                 "responses": {
                     "200": {
                         "description": "List of transactions"
@@ -591,13 +591,13 @@
                 ]
             }
         },
-        "/wallet/paystack/webhook": {
+        "/api/wallet/paystack/webhook": {
             "post": {
                 "tags": [
                     "Webhooks"
                 ],
                 "summary": "Paystack webhook handler",
-                "operationId": "2c89f8ea99530837850ec79fc0e8a399",
+                "operationId": "a67c80c935e0ffe58d6f06fe50397b4e",
                 "requestBody": {
                     "required": true,
                     "content": {

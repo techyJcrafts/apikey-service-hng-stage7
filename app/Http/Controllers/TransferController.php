@@ -21,7 +21,7 @@ class TransferController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/wallet/transfer",
+     *     path="/api/wallet/transfer",
      *     tags={"Transfer"},
      *     summary="Transfer to another wallet",
      *     security={{"bearerAuth":{}}, {"apiKey":{}}},
