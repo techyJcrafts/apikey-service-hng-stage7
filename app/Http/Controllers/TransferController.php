@@ -59,6 +59,7 @@ class TransferController extends Controller
 
         return response()->json([
             'success' => true,
+            'status' => 201,
             'message' => 'Transfer completed successfully',
             'data' => [
                 'reference' => $transfer->reference,
@@ -67,6 +68,6 @@ class TransferController extends Controller
                 'recipient_wallet' => $transfer->receiverWallet->wallet_number,
                 'created_at' => $transfer->created_at->toIso8601String(),
             ],
-        ]);
+        ], 201);
     }
 }

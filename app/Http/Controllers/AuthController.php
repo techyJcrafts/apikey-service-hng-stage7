@@ -7,7 +7,12 @@ use App\Http\Requests\SignupRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Laravel\Socialite\Facades\Socialite;
+use GuzzleHttp\Client;
+use Laravel\Socialite\Two\GoogleProvider;
+use Tymon\JWTAuth\JWTGuard;
 
 use OpenApi\Attributes as OA;
 
@@ -41,9 +46,13 @@ class AuthController extends Controller
         $token = JWTAuth::fromUser($user);
 
         return response()->json([
+            'success' => true,
+            'status' => 201,
             'message' => 'User created successfully',
-            'user' => $user,
-            'token' => $token,
+            'data' => [
+                'user' => $user,
+                'token' => $token,
+            ]
         ], 201);
     }
 
@@ -68,7 +77,11 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json(['error' => 'Invalid credentials'], 401);
+            return response()->json([
+                'success' => false,
+                'status' => 401,
+                'message' => 'Invalid credentials'
+            ], 401);
         }
 
         return $this->respondWithToken($token);
@@ -85,7 +98,12 @@ class AuthController extends Controller
     )]
     public function me(): JsonResponse
     {
-        return response()->json(auth('api')->user());
+        return response()->json([
+            'success' => true,
+            'status' => 200,
+            'message' => 'User profile successfully retrieved',
+            'data' => auth('api')->user()
+        ]);
     }
 
     #[OA\Post(
@@ -99,9 +117,15 @@ class AuthController extends Controller
     )]
     public function logout(): JsonResponse
     {
-        auth('api')->logout();
+        /** @var JWTGuard $guard */
+        $guard = auth('api');
+        $guard->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json([
+            'success' => true,
+            'status' => 200,
+            'message' => 'Successfully logged out'
+        ]);
     }
 
     #[OA\Post(
@@ -115,28 +139,48 @@ class AuthController extends Controller
     )]
     public function refresh(): JsonResponse
     {
-        return $this->respondWithToken(auth('api')->refresh());
+        /** @var JWTGuard $guard */
+        $guard = auth('api');
+        return $this->respondWithToken($guard->refresh());
     }
 
     protected function respondWithToken($token): JsonResponse
     {
+        /** @var JWTGuard $guard */
+        $guard = auth('api');
+
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
+            'success' => true,
+            'status' => 200,
+            'data' => [
+                'access_token' => $token,
+                'token_type' => 'bearer',
+                'expires_in' => $guard->factory()->getTTL() * 60
+            ]
         ]);
     }
     #[OA\Get(
         path: '/api/auth/google',
         summary: 'Redirect to Google OAuth',
+        description: 'Click the link below to login with Google. DO NOT use Try it out.',
         tags: ['Auth'],
+        externalDocs: new OA\ExternalDocumentation(
+            description: 'LOGIN WITH GOOGLE HERE',
+            url: '/api/auth/google'
+        ),
         responses: [
             new OA\Response(response: 302, description: 'Redirect to Google')
         ]
     )]
     public function redirectToGoogle()
     {
-        return \Laravel\Socialite\Facades\Socialite::driver('google')->stateless()->redirect();
+        /** @var GoogleProvider $driver */
+        $driver = Socialite::driver('google');
+        $driver->setHttpClient(new Client(['verify' => false]));
+
+        return $driver->stateless()
+            ->with(['prompt' => 'select_account'])
+            ->redirect();
     }
 
     #[OA\Get(
@@ -150,7 +194,10 @@ class AuthController extends Controller
     public function handleGoogleCallback(): JsonResponse
     {
         try {
-            $googleUser = \Laravel\Socialite\Facades\Socialite::driver('google')->stateless()->user();
+            /** @var GoogleProvider $driver */
+            $driver = Socialite::driver('google');
+            $driver->setHttpClient(new Client(['verify' => false]));
+            $googleUser = $driver->stateless()->user();
 
             $user = User::firstOrCreate(
                 ['email' => $googleUser->getEmail()],
@@ -172,7 +219,14 @@ class AuthController extends Controller
             return $this->respondWithToken($token);
 
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Google authentication failed', 'message' => $e->getMessage()], 401);
+            Log::error('Google Auth Failed', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'status' => 401,
+                'message' => 'Authentication failed. Please try again or contact support.',
+                'debug_message' => config('app.debug') ? $e->getMessage() : null
+            ], 401);
         }
     }
 }

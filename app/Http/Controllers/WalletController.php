@@ -46,6 +46,8 @@ class WalletController extends Controller
 
         return response()->json([
             'success' => true,
+            'status' => 200,
+            'message' => 'Wallet balance retrieved successfully',
             'data' => [
                 'balance' => (string) $wallet->balance,
                 'currency' => $wallet->currency,
@@ -90,9 +92,10 @@ class WalletController extends Controller
 
         return response()->json([
             'success' => true,
+            'status' => 201,
             'message' => 'Deposit initialized. Complete payment on Paystack.',
             'data' => $data,
-        ]);
+        ], 201);
     }
 
     /**
@@ -111,6 +114,8 @@ class WalletController extends Controller
 
         return response()->json([
             'success' => true,
+            'status' => 200,
+            'message' => 'Deposit status retrieved successfully',
             'data' => $status,
         ]);
     }
@@ -145,6 +150,8 @@ class WalletController extends Controller
 
         return response()->json([
             'success' => true,
+            'status' => 200,
+            'message' => 'Transaction history retrieved successfully',
             'data' => $transactions,
         ]);
     }

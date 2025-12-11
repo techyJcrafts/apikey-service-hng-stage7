@@ -36,7 +36,7 @@ class WebhookController extends Controller
      *     @OA\Response(response=200, description="Webhook processed")
      * )
      */
-    public function handlePaystack(Request $request)
+    public function handlePaystackWebhook(Request $request)
     {
         // CRITICAL: Validate signature
         $signature = $request->header('x-paystack-signature');
@@ -68,16 +68,21 @@ class WebhookController extends Controller
             $this->walletService->processSuccessfulPayment($data);
 
             return response()->json(['status' => true]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Webhook processing failed', [
                 'event' => $event,
                 'reference' => $data['reference'] ?? null,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
-            // Return 200 even on error to prevent Paystack retries
-            // We've logged the error for manual investigation
-            return response()->json(['status' => 'error_logged'], 200);
+            // Return error details for debugging (since we are in dev/test mode context)
+            return response()->json([
+                'status' => 'error_logged',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 200); // Keep 200 to satisfy Paystack, but header/body will show error
         }
     }
 }

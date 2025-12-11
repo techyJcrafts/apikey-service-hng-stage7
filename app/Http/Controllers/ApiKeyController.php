@@ -61,6 +61,7 @@ class ApiKeyController extends Controller
 
         return response()->json([
             'success' => true,
+            'status' => 201,
             'message' => 'API key created successfully. Save it now - you won\'t see it again!',
             'data' => $data,
         ], 201);
@@ -93,6 +94,7 @@ class ApiKeyController extends Controller
 
         return response()->json([
             'success' => true,
+            'status' => 201,
             'message' => 'API key rolled over successfully',
             'data' => $data,
         ], 201);
@@ -126,6 +128,8 @@ class ApiKeyController extends Controller
 
         return response()->json([
             'success' => true,
+            'status' => 200,
+            'message' => 'API keys retrieved successfully',
             'data' => $apiKeys,
         ]);
     }
@@ -147,6 +151,7 @@ class ApiKeyController extends Controller
 
         return response()->json([
             'success' => true,
+            'status' => 200,
             'message' => 'API key revoked successfully',
         ]);
     }
